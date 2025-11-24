@@ -1,7 +1,11 @@
 import { Elysia } from "elysia";
 
-const app = new Elysia().get("/", () => "Hello Elysia").listen(3000);
+const PORT= process.env.PORT|| 3000;
+
+const app= new Elysia()
+  .get( "/", ()=> "hello." )
+  .listen( PORT );
 
 console.log(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
+  `🚀 Server running at ${ app.server?.hostname }:${ app.server?.port }`
 );
