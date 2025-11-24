@@ -1,5 +1,4 @@
 import { Elysia } from "elysia";
-import { drizzle } from "drizzle-orm/bun-sqlite";
 
 const PORT= process.env.PORT!;
 
