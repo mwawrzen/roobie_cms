@@ -1,20 +1,23 @@
 import { Elysia, t } from "elysia";
 import { authConfig } from "@auth/config";
+import { validateUser } from "@/src/modules/user/service";
 
 export const authRouter= ( app: Elysia )=> app
   .use( authConfig )
-  .post( "/login", async ({ body, jwt, set })=> {
+  .post( "/login", async ({ body, jwt, set }: any)=> {
 
-    const { email, password }= body as any;
+    const { email, password }= body;
 
-    if( email!== "admin@example.com"|| password!== "admin123" ) {
+    const user= await validateUser( email, password );
+
+    if( !user ) {
       set.status= 401;
-      return { error: "Wrong login data" };
+      return { error: "Invalid login data" };
     }
 
     const token= await jwt.sign({
-      userId: 1,
-      email
+      userId: user.id,
+      email: user.email
     });
 
     return { token };
