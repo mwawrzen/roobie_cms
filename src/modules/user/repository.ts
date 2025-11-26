@@ -1,6 +1,20 @@
 import { eq } from "drizzle-orm";
 import { db } from "@db";
 import { users } from "@schema";
+import { UserExistsError } from "./errors";
+
+/**
+ * Translates db error to system error
+ */
+function translateDbError( error: unknown ): never {
+  if(
+    error instanceof Error&&
+    error.message.includes( "SQLITE_CONSTRAINT: UNIQUE" )
+  ) {
+    throw new UserExistsError;
+  }
+  throw error;
+}
 
 /**
  * Fetch user by email address
@@ -11,4 +25,34 @@ export async function getUserByEmail( email: string ) {
   return await db.query.users.findFirst({
     where: eq( users.email, email )
   });
+};
+
+/**
+ * Creates a new user in database
+ * @param email New user email
+ * @param passwordHash Hashed password of the new user
+ * @returns User object (without hash) or null
+ * @throws {UserExistsError} If user with email already exists
+ */
+export async function insertNewUser( email: string, passwordHash: string ) {
+  try {
+    const result= await db.insert( users )
+      .values({
+        email,
+        passwordHash
+      })
+      .returning();
+
+    const newUser= result[ 0 ];
+
+    if( newUser ) {
+      const { passwordHash: _, ...safeUser }= newUser;
+      return safeUser;
+    }
+
+    throw new Error( "Database operation failed: insertNewUser returned empty result" );
+
+  } catch( error ) {
+    translateDbError( error );
+  }
 };
