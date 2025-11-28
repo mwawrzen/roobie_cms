@@ -12,7 +12,7 @@ const UpdateUserBody= t.Object({
   password: t.Optional(t.String({ minLength: 8 }))
 });
 
-export const adminRouter= new Elysia({ prefix: "/admin" })
+export const adminRouter= new Elysia()
   .post( "/users", async ({ body, set })=> {
     try {
       const newUser= await registerNewUser( body.email, body.password );
@@ -40,8 +40,9 @@ export const adminRouter= new Elysia({ prefix: "/admin" })
   }, {
     body: CreateUserBody
   })
-  .get( "/me", async ({ store }: any)=> {
-    return store.user;
+  .get( "/me", async ({ user }: any)=> {
+    console.log( user );
+    return user;
   })
   .patch( "/me", async ({ body, store, set }: any)=> {
     const userId= store.user.id;
