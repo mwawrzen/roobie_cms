@@ -5,35 +5,39 @@ import { AuthenticatedUser } from "@modules/user/schemas";
 
 export const authGuard= ( app: Elysia )=> app
   .use( authJwtPlugin )
-  .resolve( async ({ jwt, headers, set }) => {
-    const authHeader= headers[ "authorization" ];
+  .resolve( async ({ jwt, set, cookie: { auth }}) => {
 
-    if( !authHeader|| !authHeader.startsWith( "Bearer " )) {
-      set.status= 401;
-      return { error: "Missing or invalid authorization header" };
+    const token= auth.value;
+
+    if( !token )
+      return { user: null };
+
+    try {
+      const payload= await jwt.verify( token as string );
+
+      if( !payload|| !payload.userId )
+        return { user: null };
+
+      const dbUser= await getUserById( Number( payload.userId ));
+
+      if( !dbUser )
+        return { user: null };
+
+      const user: AuthenticatedUser= {
+        id: dbUser.id,
+        email: dbUser.email,
+        role: dbUser.role,
+        createdAt: dbUser.createdAt
+      };
+
+      return { user };
+    } catch( e ) {
+      return { user: null };
     }
-
-    const token= authHeader.substring( 7 );
-    const profile= await jwt.verify( token );
-
-    if( !profile|| !profile.userId ) {
+  })
+  .onBeforeHandle(({ set, user })=> {
+    if( !user ) {
       set.status= 401;
-      return { error: "Invalid or expired token" };
+      return { error: "Unauthorized" };
     }
-
-    const dbUser= await getUserById( Number( profile.userId ));
-
-    if( !dbUser ) {
-      set.status= 401;
-      return { error: "User in token not found" };
-    }
-
-    const user: AuthenticatedUser= {
-      id: dbUser.id,
-      email: dbUser.email,
-      role: dbUser.role,
-      createdAt: dbUser.createdAt
-    };
-
-    return { user };
   });

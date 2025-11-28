@@ -8,7 +8,7 @@ export const authJwtPlugin= new Elysia({ name: "auth" })
     jwt({
       name: "jwt",
       secret,
-      exp: "7d"
+      exp: "1h"
     })
   );
 
