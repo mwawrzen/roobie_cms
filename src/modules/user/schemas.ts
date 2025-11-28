@@ -19,4 +19,5 @@ export type SafeUser= {
 export type AuthenticatedUser= {
   id: number;
   email: string;
+  createdAt: string;
 };
