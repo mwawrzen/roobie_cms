@@ -1,8 +1,8 @@
 import { Elysia } from "elysia";
-import { UserExistsError } from "@modules/user/errors";
+import { UserExistsError, UserNotFoundError } from "@modules/user/errors";
 import { registerNewUser } from "@modules/user/service";
 import { LoginBodySchema } from "@modules/user/schemas";
-import { getUsers } from "@modules/user/repository";
+import { getSafeUserById, getUsers } from "@modules/user/repository";
 
 export const adminRouter= new Elysia()
   .get( "/user", async ({ body, set })=> {
@@ -13,6 +13,16 @@ export const adminRouter= new Elysia()
       set.status= 500;
       return { error: "Failed to retrieve user list" };
     }
+  })
+  .get( "/user/:id", async ({ params, set })=> {
+    const id= Number( params.id );
+
+    const user= await getSafeUserById( id );
+
+    if( !user )
+      throw new UserNotFoundError();
+
+    return { user };
   })
   .post( "/user", async ({ body, set })=> {
     try {
