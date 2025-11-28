@@ -12,4 +12,4 @@ export const authPlugin= new Elysia({ name: "auth" })
     })
   );
 
-export type AuthConfig= typeof authPlugin;
+export type AuthPlugin= typeof authPlugin;
