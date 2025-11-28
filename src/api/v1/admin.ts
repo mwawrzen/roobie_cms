@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 import { UserExistsError, UserNotFoundError } from "@modules/user/errors";
 import { registerNewUser } from "@modules/user/service";
 import { LoginBodySchema } from "@modules/user/schemas";
-import { getSafeUserById, getUsers } from "@modules/user/repository";
+import { deleteUser, getSafeUserById, getUsers } from "@modules/user/repository";
 
 export const adminRouter= new Elysia()
   .get( "/user", async ({ body, set })=> {
@@ -53,4 +53,20 @@ export const adminRouter= new Elysia()
     }
   }, {
     body: LoginBodySchema
+  })
+  .delete( "/user/:id", async ({ params, set, user }: any)=> {
+    const id= Number( params.id );
+
+    if( user&& user.id=== id ) {
+      set.status= 403;
+      return { error: "Admin cannot delete their own account via this endpoint" };
+    }
+
+    const deletedCount= await deleteUser( id );
+
+    if( deletedCount=== 0 )
+      throw new UserNotFoundError();
+
+    set.status= 200;
+    return { message: "User successfully deleted" };
   });
