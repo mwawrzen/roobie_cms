@@ -3,7 +3,7 @@ import { jwt } from "@elysiajs/jwt";
 
 const secret= process.env.JWT_SECRET!;
 
-export const authConfig= new Elysia({ name: "auth" })
+export const authPlugin= new Elysia({ name: "auth" })
   .use(
     jwt({
       name: "jwt",
@@ -12,4 +12,4 @@ export const authConfig= new Elysia({ name: "auth" })
     })
   );
 
-export type AuthConfig= typeof authConfig;
+export type AuthConfig= typeof authPlugin;
