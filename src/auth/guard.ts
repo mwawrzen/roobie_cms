@@ -1,6 +1,7 @@
 import { Elysia } from "elysia";
 import { authPlugin } from "@/src/auth/plugin";
 import { getUserById } from "@modules/user/repository";
+import { AuthenticatedUser } from "@modules/user/schemas";
 
 export const authGuard= ( app: Elysia )=> app
   .use( authPlugin )
@@ -27,7 +28,11 @@ export const authGuard= ( app: Elysia )=> app
       return { error: "User in token not found" };
     }
 
-    const user= { id: dbUser.id, email: dbUser.email };
+    const user: AuthenticatedUser= {
+      id: dbUser.id,
+      email: dbUser.email,
+      createdAt: dbUser.createdAt
+    };
 
     return { user };
   });
