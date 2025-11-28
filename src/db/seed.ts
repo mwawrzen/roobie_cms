@@ -22,7 +22,8 @@ async function seedDb() {
 
   await db.insert( users ).values({
     email: ADMIN_EMAIL,
-    passwordHash: pwdHash
+    passwordHash: pwdHash,
+    role: "admin"
   });
 
   console.log( "✅ Database seeding complete." );
