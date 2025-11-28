@@ -30,7 +30,7 @@ export const users= sqliteTable( "users", {
   id: int().primaryKey({ autoIncrement: true }),
   email: text().notNull().unique(),
   passwordHash: text( "password_hash" ).notNull(),
-  createdAt: text( "created_at" ).default( sql`CURRENT_TIMESTAMP` )
+  createdAt: text( "created_at" ).default( sql`CURRENT_TIMESTAMP` ).notNull()
 });
 
 export const projectRelations= relations( projects, ({ many })=> ({
