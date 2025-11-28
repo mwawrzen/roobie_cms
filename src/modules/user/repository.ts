@@ -2,6 +2,14 @@ import { eq } from "drizzle-orm";
 import { db } from "@db";
 import { users } from "@schema";
 import { UserExistsError } from "@modules/user/errors";
+import { SafeUser } from "./schemas";
+
+const safeUserColumns= {
+  id: users.id,
+  email: users.email,
+  role: users.role,
+  createdAt: users.createdAt
+};
 
 /**
  * Translates db error to system error
@@ -44,6 +52,15 @@ export async function insertNewUser( email: string, passwordHash: string ) {
     translateDbError( error );
   }
 };
+
+/**
+ * Returns all users
+ * @returns All users from db
+ */
+export async function getUsers() {
+  const allUsers: SafeUser[]= await db.select( safeUserColumns ).from( users );
+  return allUsers;
+}
 
 /**
  * Returns user by id
