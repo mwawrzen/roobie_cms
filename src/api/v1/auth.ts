@@ -1,10 +1,10 @@
 import { Elysia } from "elysia";
-import { authPlugin } from "@/src/auth/plugin";
+import { authJwtPlugin } from "@/src/auth/jwt.plugin";
 import { validateUser } from "@modules/user/service";
 import { LoginBodySchema } from "@modules/user/schemas";
 
 export const authRouter= ( app: Elysia )=> app
-  .use( authPlugin )
+  .use( authJwtPlugin )
   .post( "/login", async ({ body, jwt, set })=> {
 
     const { email, password }= body;
