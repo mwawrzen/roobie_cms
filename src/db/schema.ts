@@ -9,10 +9,16 @@ import {
 export const userRoles= [ "admin", "editor" ] as const;
 export type UserRole= ( typeof userRoles )[ number ];
 
+export const projectStatuses= [ "ACTIVE", "ARCHIVED", "PLANNED" ] as const;
+
 export const projects= sqliteTable( "projects", {
   id: int().primaryKey({ autoIncrement: true }),
   name: text().notNull().unique(),
   description: text(),
+  status:
+    text( "status", { enum: projectStatuses })
+    .default( "PLANNED" )
+    .notNull(),
   apiKey: text( "api_key" ).notNull().unique(),
   createdAt: text( "created_at" ).default( sql`CURRENT_TIMESTAMP` )
 });
