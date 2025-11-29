@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { UserRole } from "@schema";
+import { USER_ROLE } from "@schema";
 
 export const LoginBodySchema= t.Object({
   email: t.String({ format: "email", error: "Invalid email format" }),
@@ -20,6 +20,6 @@ export type SafeUser= {
 export type AuthenticatedUser= {
   id: number;
   email: string;
-  role: UserRole;
+  role: USER_ROLE;
   createdAt: string;
 };
