@@ -21,7 +21,7 @@ export const projects= sqliteTable( "projects", {
     .default( "PLANNED" )
     .notNull(),
   apiKey: text( "api_key" ).notNull().unique(),
-  createdAt: text( "created_at" ).default( sql`CURRENT_TIMESTAMP` )
+  createdAt: text( "created_at" ).default( sql`CURRENT_TIMESTAMP` ).notNull()
 });
 
 export const contentVariables= sqliteTable( "content_variables", {
