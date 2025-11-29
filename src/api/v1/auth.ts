@@ -1,10 +1,11 @@
-import { Elysia, t } from "elysia";
-import { authConfig } from "@auth/config";
+import { Elysia } from "elysia";
+import { authJwtPlugin } from "@/src/auth/jwt.plugin";
 import { validateUser } from "@modules/user/service";
+import { LoginBodySchema } from "@modules/user/schemas";
 
 export const authRouter= ( app: Elysia )=> app
-  .use( authConfig )
-  .post( "/login", async ({ body, jwt, set }: any)=> {
+  .use( authJwtPlugin )
+  .post( "/login", async ({ body, jwt, set, cookie: { auth }})=> {
 
     const { email, password }= body;
 
@@ -20,10 +21,28 @@ export const authRouter= ( app: Elysia )=> app
       email: user.email
     });
 
-    return { token };
+    auth.set({
+      value: token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV=== "production",
+      maxAge: 60* 60,
+      path: "/"
+    });
+
+    set.status= 200;
+
+    return {
+      message: "Login successfull",
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role
+      }
+    };
   }, {
-    body: t.Object({
-      email: t.String({ format: "email" }),
-      password: t.String()
-    })
+    body: LoginBodySchema
+  })
+  .get( "/logout", ({ cookie: { auth }})=> {
+    auth.remove();
+    return { message: "Successfully logged out" };
   });

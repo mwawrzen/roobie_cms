@@ -6,6 +6,9 @@ import {
   unique
 } from "drizzle-orm/sqlite-core";
 
+export const userRoles= [ "admin", "editor" ] as const;
+export type UserRole= ( typeof userRoles )[ number ];
+
 export const projects= sqliteTable( "projects", {
   id: int().primaryKey({ autoIncrement: true }),
   name: text().notNull().unique(),
@@ -30,7 +33,8 @@ export const users= sqliteTable( "users", {
   id: int().primaryKey({ autoIncrement: true }),
   email: text().notNull().unique(),
   passwordHash: text( "password_hash" ).notNull(),
-  createdAt: text( "created_at" ).default( sql`CURRENT_TIMESTAMP` )
+  role: text( "role", { enum: userRoles }).notNull().default( "editor" ),
+  createdAt: text( "created_at" ).default( sql`CURRENT_TIMESTAMP` ).notNull()
 });
 
 export const projectRelations= relations( projects, ({ many })=> ({
