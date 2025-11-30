@@ -1,6 +1,5 @@
 import Elysia from "elysia";
 import { IdParamSchema, UpdateUserBodySchema } from "@modules/user/schemas";
-import { AccessDeniedError } from "@modules/user/errors";
 import { userService } from "@modules/user/service";
 
 export const meRouter= new Elysia()
