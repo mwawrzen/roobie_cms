@@ -59,8 +59,8 @@ export class AccessDeniedError extends Error {
 
   status= 403;
 
-  constructor() {
-    super( "Admin cannot delete their own" );
+  constructor( message: string ) {
+    super( message );
     this.name= "AccessDeniedError"
   }
 
