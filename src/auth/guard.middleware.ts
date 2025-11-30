@@ -2,10 +2,11 @@ import { Elysia } from "elysia";
 import { authJwtPlugin } from "@auth/jwt.plugin";
 import { getUserById } from "@modules/user/repository";
 import { AuthenticatedUser } from "@modules/user/schemas";
+import { UserUnauthorizedError } from "../modules/user/errors";
 
 export const authGuard= ( app: Elysia )=> app
   .use( authJwtPlugin )
-  .resolve( async ({ jwt, set, cookie: { auth }}) => {
+  .resolve( async ({ jwt, cookie: { auth }}) => {
 
     const token= auth.value;
 
@@ -35,9 +36,7 @@ export const authGuard= ( app: Elysia )=> app
       return { user: null };
     }
   })
-  .onBeforeHandle(({ set, user })=> {
-    if( !user ) {
-      set.status= 401;
-      return { error: "Unauthorized" };
-    }
+  .onBeforeHandle(({ user })=> {
+    if( !user )
+      throw new UserUnauthorizedError();
   });
