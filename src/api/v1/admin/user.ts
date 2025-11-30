@@ -1,11 +1,12 @@
-import { Elysia } from "elysia";
-import { UserExistsError, UserNotFoundError } from "@modules/user/errors";
-import { registerNewUser } from "@modules/user/service";
-import { LoginBodySchema } from "@modules/user/schemas";
-import { deleteUser, getSafeUserById, getUsers } from "@modules/user/repository";
+import { IdParamSchema } from "@/src/modules/project/schemas";
+import { UserExistsError, UserNotFoundError } from "@/src/modules/user/errors";
+import { deleteUser, getSafeUserById, getUsers } from "@/src/modules/user/repository";
+import { LoginBodySchema } from "@/src/modules/user/schemas";
+import { registerNewUser } from "@/src/modules/user/service";
+import Elysia from "elysia";
 
-export const adminRouter= new Elysia()
-  .get( "/user", async ({ body, set })=> {
+export const userRouter= new Elysia({ prefix: "/user" })
+  .get( "/", async ({ set })=> {
     try {
       const users= await getUsers();
       return { users };
@@ -14,17 +15,17 @@ export const adminRouter= new Elysia()
       return { error: "Failed to retrieve user list" };
     }
   })
-  .get( "/user/:id", async ({ params, set })=> {
-    const id= Number( params.id );
-
-    const user= await getSafeUserById( id );
+  .get( "/:id", async ({ params })=> {
+    const user= await getSafeUserById( params.id );
 
     if( !user )
       throw new UserNotFoundError();
 
     return { user };
+  }, {
+    params: IdParamSchema
   })
-  .post( "/user", async ({ body, set })=> {
+  .post( "/", async ({ body, set })=> {
     try {
       const { id, email, createdAt }= await registerNewUser(
         body.email,
@@ -54,19 +55,19 @@ export const adminRouter= new Elysia()
   }, {
     body: LoginBodySchema
   })
-  .delete( "/user/:id", async ({ params, set, user }: any)=> {
-    const id= Number( params.id );
-
-    if( user&& user.id=== id ) {
+  .delete( "/:id", async ({ params, set, user }: any)=> {
+    if( user&& user.id=== params.id ) {
       set.status= 403;
       return { error: "Admin cannot delete their own account via this endpoint" };
     }
 
-    const deletedCount= await deleteUser( id );
+    const deletedCount= await deleteUser( params.id );
 
     if( deletedCount=== 0 )
       throw new UserNotFoundError();
 
     set.status= 200;
     return { message: "User successfully deleted" };
+  }, {
+    params: IdParamSchema
   });
