@@ -1,26 +1,40 @@
 import { eq } from "drizzle-orm";
 import { db } from "@db";
 import { projects } from "@schema";
-import { CreateProjectBody, Project } from "@modules/project/schemas";
+import { CreateProjectBody, Project, UpdateProjectBody } from "@modules/project/schemas";
 import { randomUUIDv7 } from "bun";
 
-export async function createProject(
+/**
+ * Inserts project into db
+ * @param {CreateProjectBody} data
+ * @returns Inserted project
+ */
+async function insert(
   data: CreateProjectBody
 ): Promise<Project> {
-  const [ newProject ]= await db.insert( projects )
+  const [ project ]= await db.insert( projects )
     .values({
       ...data,
       apiKey: randomUUIDv7()
     })
     .returning();
-  return newProject;
+  return project;
 };
 
-export async function getProjects(): Promise<Project[]> {
+/**
+ * Fetches all projects from db
+ * @returns Array of projects
+ */
+async function fetchAll(): Promise<Project[]> {
   return db.select().from( projects );
 };
 
-export async function getProjectById(
+/**
+ * Fetches project from db by its id
+ * @param id
+ * @returns Project
+ */
+async function fetchById(
   id: number
 ): Promise<Project| undefined> {
   const project= await db.query.projects.findFirst({
@@ -29,10 +43,16 @@ export async function getProjectById(
   return project;
 };
 
-export async function updateProject(
+/**
+ * Updates project data in db
+ * @param id
+ * @param {UpdateProjectBody} data
+ * @returns Updated project
+ */
+async function update(
   id: number,
-  data: Partial<CreateProjectBody>
-) {
+  data: UpdateProjectBody
+): Promise<Project> {
   const [ updatedProject ]= await db.update( projects )
     .set( data )
     .where( eq( projects.id, id ))
@@ -40,9 +60,24 @@ export async function updateProject(
   return updatedProject;
 };
 
-export async function deleteProject( id: number ): Promise<number> {
-  const result= await db.delete( projects )
+/**
+ * Removes project from db by its id
+ * @param id
+ * @returns Number of removed projects (0 or 1)
+ */
+async function remove( id: number ): Promise<number> {
+  const deletedProjects= await db.delete( projects )
     .where( eq( projects.id, id ))
-    .run();
-  return ( result as unknown as { changes: number }).changes;
+    .returning();
+  return deletedProjects.length;
 };
+
+export const projectRepository= {
+  insert,
+  fetchAll,
+  fetchById,
+  update,
+  remove
+};
+
+export type ProjectRepository= typeof projectRepository;
