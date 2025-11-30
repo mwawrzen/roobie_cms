@@ -85,9 +85,18 @@ async function getById( id: number ): Promise<UserPublic> {
  */
 async function update(
   id: number,
-  data: UpdateUserBody
+  { email, password }: UpdateUserBody
 ): Promise<UserPublic> {
-  const updatedUser= await userRepository.update( id, data );
+
+  const newData: { email?: string, passwordHash?: string }= {};
+
+  if( email )
+    newData.email= email
+
+  if( password )
+    newData.passwordHash= await userService.hashPassword( password );
+
+  const updatedUser= await userRepository.update( id, newData );
 
   if( !updatedUser )
     throw new UserNotFoundError( id );
