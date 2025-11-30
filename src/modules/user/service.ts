@@ -108,7 +108,7 @@ async function remove( id: number ): Promise<void> {
     throw new UserNotFoundError( id );
 
   if( user.role=== "ADMIN" )
-    throw new AccessDeniedError()
+    throw new AccessDeniedError( "Admin account cannot be deleted" );
 
   const result= await userRepository.remove( id );
 
