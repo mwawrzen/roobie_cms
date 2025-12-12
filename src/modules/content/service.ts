@@ -79,7 +79,6 @@ async function remove(
 }
 
 export const contentService= {
-  checkProjectAccess,
   create,
   getAll,
   update,
