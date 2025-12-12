@@ -35,6 +35,6 @@ export const projectRouter= new Elysia({ prefix: "/project" })
     params: IdParamSchema
   })
   .group( "/:projectId", app=> app
-    .use( new Elysia().guard({ params: IdParamSchema }))
+    .guard({ params: IdParamSchema })
     .use( projectVariablesRouter )
   );
