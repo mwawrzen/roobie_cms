@@ -1,10 +1,11 @@
 import Elysia from "elysia";
-import { projectService } from "@/src/modules/project/service";
+import { projectService } from "@modules/project/service";
 import {
   CreateProjectBodySchema,
   UpdateProjectBodySchema,
   IdParamSchema
 } from "@/src/modules/project/schemas";
+import { projectVariablesRouter } from "@v1/admin/project.variables";
 
 export const projectRouter= new Elysia({ prefix: "/project" })
   .post( "/", async ({ body, status })=> {
@@ -32,4 +33,8 @@ export const projectRouter= new Elysia({ prefix: "/project" })
     return status( 204 );
   }, {
     params: IdParamSchema
-  });
+  })
+  .group( "/:projectId", app=> app
+    .use( new Elysia().guard({ params: IdParamSchema }))
+    .use( projectVariablesRouter )
+  );
