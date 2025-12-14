@@ -8,14 +8,14 @@ export const publicRouter= new Elysia()
     return await projectService.getAll();
   })
   .get( "/project/:id/variables", async ({ params: { id }})=> {
-    const variables= await contentPublicService//.getAll( id, user );
+    const variables= await contentPublicService.getAll( id );
 
-    // const variablesMap= variables.reduce(( acc, curr )=> {
-    //   acc[ curr.key ]= curr.value;
-    //   return acc;
-    // }, {} as Record<string, string>);
+    const variablesMap= variables.reduce(( acc, curr )=> {
+      acc[ curr.key ]= curr.value;
+      return acc;
+    }, {} as Record<string, string>);
 
-    // return variablesMap;
+    return variablesMap;
   }, {
     params: IdParamSchema
   });
