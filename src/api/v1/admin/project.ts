@@ -17,24 +17,20 @@ export const projectRouter= new Elysia({ prefix: "/project" })
   .get( "/", async ()=> {
     return await projectService.getAll();
   })
-  .get( "/:id", async ({ params: { id }})=> {
-    return await projectService.getById( id );
-  }, {
-    params: IdParamSchema
-  })
-  .patch( "/:id", async ({ params: { id }, body }) => {
-    return await projectService.update( id, body );
-  }, {
-    body: UpdateProjectBodySchema,
-    params: IdParamSchema
-  })
-  .delete( "/:id", async ({ params: { id }, status })=> {
-    await projectService.remove( id );
-    return status( 204 );
-  }, {
-    params: IdParamSchema
-  })
-  .group( "/:projectId", app=> app
-    .guard({ params: IdParamSchema })
-    .use( projectVariablesRouter )
+  .guard({ params: IdParamSchema }, app=> app
+    .group( "/:id", app=> app
+      .get( "/", async ({ params: { id }})=> {
+        return await projectService.getById( id );
+      })
+      .patch( "/", async ({ params: { id }, body }) => {
+        return await projectService.update( id, body );
+      }, {
+        body: UpdateProjectBodySchema
+      })
+      .delete( "/", async ({ params: { id }, status })=> {
+        await projectService.remove( id );
+        return status( 204 );
+      })
+      .use( projectVariablesRouter )
+    )
   );
