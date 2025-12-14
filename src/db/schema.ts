@@ -1,5 +1,5 @@
 import { relations, sql } from "drizzle-orm";
-import { int, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
+import { int, sqliteTable, text, unique, primaryKey } from "drizzle-orm/sqlite-core";
 import { PROJECT_STATUSES } from "@modules/project/schemas";
 import { USER_ROLES } from "@modules/user/schemas";
 
@@ -32,6 +32,23 @@ export const contentVariables= sqliteTable( "content_variables", {
   value: text().notNull(),
   projectId: int( "project_id" ).notNull().references( ()=> projects.id )
 });
+
+export const userProjects= sqliteTable( "user_prjects", {
+  userId:
+    int( "user_id", { mode: "number" })
+    .notNull()
+    .references( ()=> users.id, { onDelete: "cascade" }),
+  projectId:
+    int( "project_id", { mode: "number" })
+    .notNull()
+    .references( ()=> projects.id, { onDelete: "cascade" }),
+  role:
+    text( "role", { enum: USER_ROLES })
+    .notNull()
+    .default( "EDITOR" )
+}, t=> ({
+  pk: primaryKey({ columns: [ t.userId, t.projectId ]})
+}));
 
 /* RELATIONS */
 
