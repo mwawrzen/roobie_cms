@@ -1,8 +1,13 @@
-import { eq } from "drizzle-orm";
-import { db } from "@db";
-import { projects } from "@schema";
-import { CreateProjectBody, Project, UpdateProjectBody } from "@modules/project/schemas";
 import { randomUUIDv7 } from "bun";
+import { and, eq } from "drizzle-orm";
+import { db } from "@db";
+import { projects, userProjects } from "@schema";
+import { type USER_ROLE } from "@modules/user/schemas";
+import {
+  CreateProjectBody,
+  UpdateProjectBody,
+  Project
+} from "@modules/project/schemas";
 
 /**
  * Inserts project into database
@@ -74,12 +79,58 @@ async function remove( id: number ): Promise<number> {
   return deletedProjects.length;
 };
 
+/**
+ * Fetches record from users_project table by project and user ids
+ * @param userId
+ * @param projectId
+ * @returns Project role for exact user or undefined
+ */
+async function fetchProjectRole(
+  userId: number,
+  projectId: number
+): Promise<USER_ROLE| undefined> {
+  const access= await db.query.userProjects.findFirst({
+    where: and(
+      eq( userProjects.userId, userId ),
+      eq( userProjects.projectId, projectId )
+    )
+  });
+
+  return access?.role;
+}
+
+/**
+ * Updates project user roles in database
+ * @param projectId
+ * @param {{ userId: number, role: USER_ROLE }}updates
+ */
+async function updateProjectRoles(
+  projectId: number,
+  updates: { userId: number, role: USER_ROLE }[]
+) {
+  await db
+    .delete( userProjects )
+    .where( eq( userProjects.projectId, projectId ));
+
+  if( updates.length> 0 ) {
+    await db.insert( userProjects ).values(
+      updates.map( u=> ({
+        projectId,
+        userId: u.userId,
+        role: u.role
+      }))
+    );
+  }
+}
+
 export const projectRepository= {
   insert,
   fetchAll,
   fetchById,
   update,
-  remove
+  remove,
+  updateProjectRoles,
+  fetchProjectRole
 };
 
 export type ProjectRepository= typeof projectRepository;
