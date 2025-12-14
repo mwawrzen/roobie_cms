@@ -1,6 +1,6 @@
 import { ProjectNotFoundError } from "./errors";
 import { projectRepository } from "./repository";
-import { CreateProjectBody, Project, UpdateProjectBody } from "./schemas";
+import { CreateProjectBody, Project, UpdateProjectBody, UpdateProjectRolesBody } from "./schemas";
 
 /**
  * Creates new project
@@ -69,12 +69,28 @@ async function remove( id: number ): Promise<void> {
     throw new ProjectNotFoundError( id );
 }
 
+/**
+ * Updates project user roles
+ * @param projectId
+ * @param {UpdateProjectRolesBody} data
+ * @returns true
+ */
+async function manageProjectRoles(
+  projectId: number,
+  data: UpdateProjectRolesBody
+) {
+  await getById( projectId );
+  await projectRepository.updateProjectRoles( projectId, data.updates );
+  return true;
+}
+
 export const projectService= {
   create,
   getAll,
   getById,
   update,
-  remove
+  remove,
+  manageProjectRoles
 };
 
 export type ProjectService= typeof projectService;
