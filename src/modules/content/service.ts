@@ -1,17 +1,31 @@
-import { UserPublic } from "../user/schemas";
-import { ContentVariableNotFoundError, ProjectAccessDeniedError } from "./errors";
-import { contentRepository } from "./repository";
-import { ContentVariable, ContentVariableBody } from "./schemas";
+import { UserPublic } from "@modules/user/schemas";
+import { contentRepository } from "@modules/content/repository";
+import { ContentVariable, ContentVariableBody } from "@modules/content/schemas";
+import { projectRepository } from "@modules/project/repository";
+import {
+  ContentVariableNotFoundError,
+  ProjectAccessDeniedError
+} from "@modules/content/errors";
 
 /**
  * Check if user has access to project
  * @param user
- * @param id Project id
+ * @param projectId
  * @throws {ProjectAccessDeniedError} If user does not have an access
  */
-function checkProjectAccess( user: UserPublic, id: number ): void {
+async function checkProjectAccess(
+  user: UserPublic,
+  projectId: number
+): Promise<void> {
+
   if( user.role!== "ADMIN" )
-    throw new ProjectAccessDeniedError( id );
+    throw new ProjectAccessDeniedError( projectId );
+
+  const projectRole=
+    await projectRepository.fetchProjectRole( user.id, projectId );
+
+  if( projectRole!== "EDITOR" )
+    throw new ProjectAccessDeniedError( projectId );
 }
 
 /**
