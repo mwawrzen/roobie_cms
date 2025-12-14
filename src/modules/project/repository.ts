@@ -1,9 +1,13 @@
-import { eq } from "drizzle-orm";
+import { randomUUIDv7 } from "bun";
+import { and, eq } from "drizzle-orm";
 import { db } from "@db";
 import { projects, userProjects } from "@schema";
-import { CreateProjectBody, Project, UpdateProjectBody } from "@modules/project/schemas";
-import { randomUUIDv7 } from "bun";
 import { type USER_ROLE } from "@modules/user/schemas";
+import {
+  CreateProjectBody,
+  UpdateProjectBody,
+  Project
+} from "@modules/project/schemas";
 
 /**
  * Inserts project into database
@@ -62,6 +66,40 @@ async function update(
 };
 
 /**
+ * Removes project from database by its id
+ * @param id
+ * @returns Number of removed projects (0 or 1)
+ */
+async function remove( id: number ): Promise<number> {
+
+  const deletedProjects= await db.delete( projects )
+    .where( eq( projects.id, id ))
+    .returning();
+
+  return deletedProjects.length;
+};
+
+/**
+ * Fetches record from users_project table by project and user ids
+ * @param userId
+ * @param projectId
+ * @returns Project role for exact user or undefined
+ */
+async function fetchProjectRole(
+  userId: number,
+  projectId: number
+): Promise<USER_ROLE| undefined> {
+  const access= await db.query.userProjects.findFirst({
+    where: and(
+      eq( userProjects.userId, userId ),
+      eq( userProjects.projectId, projectId )
+    )
+  });
+
+  return access?.role;
+}
+
+/**
  * Updates project user roles in database
  * @param projectId
  * @param {{ userId: number, role: USER_ROLE }}updates
@@ -85,27 +123,14 @@ async function updateProjectRoles(
   }
 }
 
-/**
- * Removes project from database by its id
- * @param id
- * @returns Number of removed projects (0 or 1)
- */
-async function remove( id: number ): Promise<number> {
-
-  const deletedProjects= await db.delete( projects )
-    .where( eq( projects.id, id ))
-    .returning();
-
-  return deletedProjects.length;
-};
-
 export const projectRepository= {
   insert,
   fetchAll,
   fetchById,
   update,
+  remove,
   updateProjectRoles,
-  remove
+  fetchProjectRole
 };
 
 export type ProjectRepository= typeof projectRepository;
