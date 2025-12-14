@@ -28,7 +28,7 @@ export const projects= sqliteTable( "projects", {
 
 export const contentVariables= sqliteTable( "content_variables", {
   id: int().primaryKey({ autoIncrement: true }),
-  keyName: text( "key_name" ).notNull(),
+  key: text( "key" ).notNull(),
   value: text().notNull(),
   projectId: int( "project_id" ).notNull().references( ()=> projects.id )
 });
@@ -53,5 +53,5 @@ export const contentVariablesRelations= relations(
 
 export const contentVariablesIdx= unique( "key_per_project" ).on(
   contentVariables.projectId,
-  contentVariables.keyName
+  contentVariables.key
 );
