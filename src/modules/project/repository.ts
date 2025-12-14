@@ -1,8 +1,9 @@
 import { eq } from "drizzle-orm";
 import { db } from "@db";
-import { projects } from "@schema";
+import { projects, userProjects } from "@schema";
 import { CreateProjectBody, Project, UpdateProjectBody } from "@modules/project/schemas";
 import { randomUUIDv7 } from "bun";
+import { type USER_ROLE } from "@modules/user/schemas";
 
 /**
  * Inserts project into database
@@ -60,6 +61,22 @@ async function update(
   return updatedProject;
 };
 
+async function updateProjectRoles( projectId: number, updates: { userId: number, role: USER_ROLE }[]) {
+  await db
+    .delete( userProjects )
+    .where( eq( userProjects.projectId, projectId ));
+
+  if( updates.length> 0 ) {
+    await db.insert( userProjects ).values(
+      updates.map( u=> ({
+        projectId,
+        userId: u.userId,
+        role: u.role
+      }))
+    );
+  }
+}
+
 /**
  * Removes project from database by its id
  * @param id
@@ -79,6 +96,7 @@ export const projectRepository= {
   fetchAll,
   fetchById,
   update,
+  updateProjectRoles,
   remove
 };
 
