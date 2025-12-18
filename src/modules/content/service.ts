@@ -95,7 +95,8 @@ export const contentService= {
   create,
   getAll,
   update,
-  remove
+  remove,
+  checkProjectAccess
 };
 
 export type ContentService= typeof contentService;
