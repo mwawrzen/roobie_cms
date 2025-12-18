@@ -1,5 +1,5 @@
 import Elysia from "elysia";
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { afterEach, describe, expect, it, mock } from "bun:test";
 import { api } from "@v1/index";
 import { jwtConfig } from "@auth/jwt.plugin";
 import { userRepository } from "@/src/modules/user/repository";
@@ -27,10 +27,6 @@ const generateToken= async (
 };
 
 describe( "API Integration - Guards & Routes", ()=> {
-
-  beforeEach(()=> {
-    mock.restore();
-  });
 
   it( "GET /public/projects should be available for everyone", async ()=> {
     const res= await api.handle(
@@ -64,5 +60,9 @@ describe( "API Integration - Guards & Routes", ()=> {
     const res= await api.handle( req );
 
     expect( res.status ).not.toBe( 403 );
+  });
+
+  afterEach(()=> {
+    mock.restore();
   });
 });

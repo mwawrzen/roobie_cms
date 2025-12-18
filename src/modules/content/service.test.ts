@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { afterEach, describe, expect, it, mock } from "bun:test";
 import { contentService } from "@modules/content/service";
 import { projectRepository } from "@modules/project/repository";
 import { ProjectAccessDeniedError } from "@modules/content/errors";
@@ -10,10 +10,6 @@ mock.module( "@modules/project/repository", ()=> ({
 }));
 
 describe( "ContentService - checkProjectAccess", ()=> {
-
-  beforeEach(()=> {
-    mock.restore();
-  });
 
   it( "should let admin always have an access", async ()=> {
     const adminUser= { id: 1, role: "ADMIN", email: "admin@example.com" } as any;
@@ -45,5 +41,9 @@ describe( "ContentService - checkProjectAccess", ()=> {
     expect( contentService.checkProjectAccess( editorUser, 999 ))
       .rejects
       .toThrow( ProjectAccessDeniedError );
+  });
+
+  afterEach(()=> {
+    mock.restore();
   });
 });
