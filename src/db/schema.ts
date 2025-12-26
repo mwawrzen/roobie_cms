@@ -66,6 +66,17 @@ export const contentVariablesRelations= relations(
   })
 );
 
+export const projectUserRelations= relations( userProjects, ({ one })=> ({
+  user: one( users, {
+    fields: [ userProjects.userId ],
+    references: [ users.id ]
+  }),
+  project: one( projects, {
+    fields: [ userProjects.projectId ],
+    references: [ projects.id ]
+  })
+}));
+
 /* UNIQUE VALIDATION */
 
 export const contentVariablesIdx= unique( "key_per_project" ).on(

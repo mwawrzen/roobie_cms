@@ -87,14 +87,24 @@ async function remove( id: number ): Promise<number> {
  */
 async function fetchProjectUsers(
   projectId: number
-): Promise<{ userId: number, projectId: number, role: USER_ROLE }[]> {
+) {
   const access= await db.query.userProjects.findMany({
-    where: and(
-      eq( userProjects.projectId, projectId )
-    )
+    where: and( eq( userProjects.projectId, projectId ) ),
+    with: {
+      user: {
+        columns: {
+          id: true,
+          email: true,
+          role: true,
+          createdAt: true
+        }
+      }
+    }
   });
 
-  return access;
+  return access.map( item=> ({
+    ...item.user
+  }));
 }
 
 /**
