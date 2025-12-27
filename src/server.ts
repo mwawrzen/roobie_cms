@@ -1,9 +1,19 @@
 import { Elysia } from "elysia";
+import { openapi } from "@elysiajs/openapi";
 import { api } from "@/src/api/v1/index";
 
 const PORT= process.env.PORT!;
 
 const app= new Elysia()
+  .use( openapi({
+    documentation: {
+      info: {
+        title: "Roobie CMS API",
+        version: "1.0.0",
+        description: "Documentation of Roobie CMS REST API"
+      }
+    }
+  }))
   .use( api );
 
 app.listen( PORT, ({ hostname, port })=> {
