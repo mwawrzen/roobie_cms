@@ -44,3 +44,4 @@ package-lock.json
 
 # SQLite
 *.db
+*.sqlite
